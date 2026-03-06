@@ -1,28 +1,87 @@
-import { AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { AlertTriangle, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 
-// Renders inline markdown-like bold (**text**) 
+// ── Copy Button ──
+function CopyButton({ text }) {
+  const [copied, setCopied] = useState(false);
+  const handle = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handle} title="Copy to clipboard">
+      {copied ? <Check size={14} /> : <Copy size={14} />}
+      {copied ? 'Copied!' : 'Copy'}
+    </button>
+  );
+}
+
+// ── Status Badge ──
+function StatusBadge({ status }) {
+  if (!status) return null;
+  const labels = { finalized: 'Finalized', 'in-progress': 'In Progress', draft: 'Draft' };
+  return <span className={`status-badge status-badge--${status}`}>{labels[status] || status}</span>;
+}
+
+// ── Renders inline **bold** markdown ──
 function RichText({ text }) {
   if (!text) return null;
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return (
     <>
-      {parts.map((part, i) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={i}>{part.slice(2, -2)}</strong>;
-        }
-        return <span key={i}>{part}</span>;
-      })}
+      {parts.map((part, i) =>
+        part.startsWith('**') && part.endsWith('**')
+          ? <strong key={i}>{part.slice(2, -2)}</strong>
+          : <span key={i}>{part}</span>
+      )}
     </>
   );
 }
 
 // ── Section Header ──
-function SectionHeader({ number, title, id }) {
+function SectionHeader({ number, title, id, status, copyText }) {
   return (
     <div className="section-header" id={id}>
       {number && <div className="section-number">Section {number}</div>}
-      <h2 className="section-title">{title}</h2>
+      <div className="section-header-row">
+        <h2 className="section-title">{title}</h2>
+        <div className="section-header-actions">
+          <StatusBadge status={status} />
+          {copyText && <CopyButton text={copyText} />}
+        </div>
+      </div>
       <hr className="section-divider" />
+    </div>
+  );
+}
+
+// ── Collapsible Subsection ──
+function Subsection({ sub, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="subsection" id={sub.id}>
+      <button className="subsection-toggle" onClick={() => setOpen(o => !o)}>
+        <h3 className="subsection-title">{sub.title}</h3>
+        {open ? <ChevronUp size={16} className="subsection-chevron" /> : <ChevronDown size={16} className="subsection-chevron" />}
+      </button>
+      {open && (
+        <div className="subsection-body">
+          {sub.body && <p className="body-text">{sub.body}</p>}
+          {sub.type === 'ordered-list' && (
+            <ol className="ordered-list">
+              {sub.items.map((item, i) => <li key={i}>{item}</li>)}
+            </ol>
+          )}
+          {sub.type === 'unordered-list' && (
+            <ul className="unordered-list">
+              {sub.items.map((item, i) => <li key={i}>{item}</li>)}
+            </ul>
+          )}
+          {sub.footer && <p className="body-text" style={{ marginTop: '0.75rem' }}>{sub.footer}</p>}
+        </div>
+      )}
     </div>
   );
 }
@@ -31,7 +90,7 @@ function SectionHeader({ number, title, id }) {
 function ProseSection({ section }) {
   return (
     <div className="constitution-section">
-      <SectionHeader {...section} />
+      <SectionHeader {...section} copyText={section.content.body} />
       <p className="body-text"><RichText text={section.content.body} /></p>
     </div>
   );
@@ -41,7 +100,7 @@ function ProseSection({ section }) {
 function CalloutTitleSection({ section }) {
   return (
     <div className="constitution-section">
-      <SectionHeader {...section} />
+      <SectionHeader {...section} copyText={section.content.body} />
       <div className="callout-title">
         <p>{section.content.body}</p>
       </div>
@@ -55,34 +114,19 @@ function ProjectDescriptionSection({ section }) {
     <div className="constitution-section">
       <SectionHeader {...section} />
       <p className="body-text"><RichText text={section.intro} /></p>
-
       {section.subsections.map(sub => (
-        <div className="subsection" key={sub.id} id={sub.id}>
-          <h3 className="subsection-title">{sub.title}</h3>
-          {sub.type === 'ordered-list' ? (
-            <ol className="ordered-list">
-              {sub.items.map((item, i) => <li key={i}>{item}</li>)}
-            </ol>
-          ) : (
-            <p className="body-text">{sub.body}</p>
-          )}
-        </div>
+        <Subsection key={sub.id} sub={sub} />
       ))}
-
       {section.toBeConfirmed && (
         <div className="callout-warning" id="to-be-confirmed">
           <div className="callout-warning-header">
             <AlertTriangle size={18} />
             To Be Confirmed
           </div>
-          <div className="callout-warning-subtitle">
-            {section.toBeConfirmed.subtitle}
-          </div>
+          <div className="callout-warning-subtitle">{section.toBeConfirmed.subtitle}</div>
           <div className="callout-warning-body">
             <ul>
-              {section.toBeConfirmed.items.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
+              {section.toBeConfirmed.items.map((item, i) => <li key={i}>{item}</li>)}
             </ul>
           </div>
         </div>
@@ -91,16 +135,15 @@ function ProjectDescriptionSection({ section }) {
   );
 }
 
-// ── Objectives List ──
+// ── Specific Objectives ──
 function ObjectivesSection({ section }) {
+  const copyText = section.content.items.map((item, i) => `${i + 1}. ${item.emphasis}${item.rest}`).join('\n');
   return (
     <div className="constitution-section">
-      <SectionHeader {...section} />
+      <SectionHeader {...section} copyText={copyText} />
       <ol className="ordered-list">
         {section.content.items.map((item, i) => (
-          <li key={i}>
-            <strong>{item.emphasis}</strong>{item.rest}
-          </li>
+          <li key={i}><strong>{item.emphasis}</strong>{item.rest}</li>
         ))}
       </ol>
     </div>
@@ -109,13 +152,17 @@ function ObjectivesSection({ section }) {
 
 // ── Research Questions ──
 function ResearchQuestionsSection({ section }) {
+  const copyText = section.content.questions.map((q, i) => `RQ${i + 1}: ${q}`).join('\n\n');
   return (
     <div className="constitution-section">
-      <SectionHeader {...section} />
+      <SectionHeader {...section} copyText={copyText} />
       <p className="body-text">{section.content.intro}</p>
-      <ol className="ordered-list">
+      <ol className="ordered-list rq-list">
         {section.content.questions.map((q, i) => (
-          <li key={i}>{q}</li>
+          <li key={i}>
+            <span className="rq-text">{q}</span>
+            <CopyButton text={q} />
+          </li>
         ))}
       </ol>
     </div>
@@ -130,16 +177,11 @@ function EvaluationPlanSection({ section }) {
       {section.content.pillars.map(pillar => (
         <div className="subsection" key={pillar.id} id={pillar.id}>
           <h3 className="subsection-title">{pillar.title}</h3>
-          <p className="objective-text">
-            <strong>Objective:</strong> {pillar.objective}
-          </p>
+          <p className="objective-text"><strong>Objective:</strong> {pillar.objective}</p>
           <div className="table-wrapper">
             <table className="data-table">
               <thead>
-                <tr>
-                  <th>Metric</th>
-                  <th>Description</th>
-                </tr>
+                <tr><th>Metric</th><th>Description</th></tr>
               </thead>
               <tbody>
                 {pillar.rows.map((row, i) => (
@@ -167,10 +209,7 @@ function AlignmentGuideSection({ section }) {
       <div className="table-wrapper">
         <table className="data-table">
           <thead>
-            <tr>
-              <th>BIP Section</th>
-              <th>Must Connect To</th>
-            </tr>
+            <tr><th>BIP Section</th><th>Must Connect To</th></tr>
           </thead>
           <tbody>
             {content.rows.map((row, i) => (
@@ -184,7 +223,7 @@ function AlignmentGuideSection({ section }) {
       </div>
       <div className="callout-note">
         <p><strong>Note:</strong> {content.note.line1}</p>
-        <p style={{ marginTop: '0.5rem' }}><strong>{content.note.line2}</strong></p>
+        {content.note.line2 && <p style={{ marginTop: '0.5rem' }}><strong>{content.note.line2}</strong></p>}
       </div>
     </div>
   );
@@ -193,23 +232,14 @@ function AlignmentGuideSection({ section }) {
 // ── Main Renderer ──
 export default function SectionRenderer({ section }) {
   const type = section.content?.type;
-
   switch (type) {
-    case 'prose':
-      return <ProseSection section={section} />;
-    case 'callout-title':
-      return <CalloutTitleSection section={section} />;
-    case 'complex':
-      return <ProjectDescriptionSection section={section} />;
-    case 'objectives-list':
-      return <ObjectivesSection section={section} />;
-    case 'research-questions':
-      return <ResearchQuestionsSection section={section} />;
-    case 'evaluation-pillars':
-      return <EvaluationPlanSection section={section} />;
-    case 'alignment-table':
-      return <AlignmentGuideSection section={section} />;
-    default:
-      return null;
+    case 'prose':           return <ProseSection section={section} />;
+    case 'callout-title':   return <CalloutTitleSection section={section} />;
+    case 'complex':         return <ProjectDescriptionSection section={section} />;
+    case 'objectives-list': return <ObjectivesSection section={section} />;
+    case 'research-questions': return <ResearchQuestionsSection section={section} />;
+    case 'evaluation-pillars': return <EvaluationPlanSection section={section} />;
+    case 'alignment-table': return <AlignmentGuideSection section={section} />;
+    default: return null;
   }
 }

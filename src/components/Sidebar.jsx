@@ -39,6 +39,15 @@ export default function Sidebar() {
     return () => observer.disconnect();
   }, []);
 
+  // Close sidebar on scroll (mobile UX)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 900) setIsOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const scrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) {
@@ -50,7 +59,7 @@ export default function Sidebar() {
   // Build nav items
   const navItems = [];
   sections.forEach(s => {
-    navItems.push({ id: s.id, label: s.number ? `${s.number}. ${s.title}` : s.title, level: 0 });
+    navItems.push({ id: s.id, label: s.number ? `${s.number}. ${s.title}` : s.title, level: 0, status: s.status });
     if (s.subsections) {
       s.subsections.forEach(sub => {
         navItems.push({ id: sub.id, label: sub.title, level: 1 });
@@ -97,7 +106,10 @@ export default function Sidebar() {
               className={`nav-item ${item.level === 1 ? 'nav-item--sub' : ''} ${activeId === item.id ? 'active' : ''}`}
               onClick={() => scrollTo(item.id)}
             >
-              {item.label}
+              <span>{item.label}</span>
+              {item.status && (
+                <span className={`nav-status-dot nav-status-dot--${item.status}`} title={item.status} />
+              )}
             </button>
           ))}
         </nav>
