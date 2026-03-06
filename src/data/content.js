@@ -46,7 +46,7 @@ export const sections = [
     status: "finalized",
     content: {
       type: "prose",
-      body: `This document serves as the foundational reference for the WildcatPark BIP. Every section of the research paper—Introduction, Methodology, Results, Discussion, and Conclusion—must trace back to and align with the elements defined here. Items flagged as "To Be Confirmed" must be resolved before the corresponding paper sections are finalized.`,
+      body: `This document serves as the foundational reference for the WildcatPark BIP. Every section of the research paper—Introduction, Methodology, Results, Discussion, and Conclusion—must trace back to and align with the elements defined here.`,
     },
   },
 
@@ -73,7 +73,7 @@ export const sections = [
     title: "Project Description",
     status: "finalized",
     content: { type: "complex" },
-    intro: `WildcatPark is a real-time IoT parking occupancy monitoring system designed for Cebu Institute of Technology – University (CIT-U). It uses computer vision powered by YOLO26 (Ultralytics) via a webcam connected to a processing computer to monitor a campus parking area and estimate its current occupancy level. Occupancy data is synchronized to Firebase / Google Cloud at near real-time intervals (every few minutes) and displayed through a web-based dashboard.`,
+    intro: `WildcatPark is a real-time IoT parking occupancy monitoring system designed for Cebu Institute of Technology – University (CIT-U). It uses **computer vision powered by YOLO26 (Ultralytics)** via a webcam connected to a processing computer to monitor a campus parking area and estimate its current occupancy level. Occupancy data is synchronized to **Firebase / Google Cloud** at near real-time intervals (every few minutes) and displayed through a **web-based dashboard**.`,
     subsections: [
       {
         id: "the-problem",
@@ -183,9 +183,9 @@ export const sections = [
     content: {
       type: "objectives-list",
       items: [
-        { emphasis: "To design and develop", rest: " a real-time IoT-based parking occupancy monitoring system with cloud-synchronized data analytics for CIT-U." },
-        { emphasis: "To evaluate", rest: " the technical accuracy and reliability of WildcatPark in detecting real-time parking slot occupancy." },
-        { emphasis: "To determine", rest: " the impact of WildcatPark on users' parking experience by comparing pre-deployment and post-deployment survey data on search time, stress levels, and overall satisfaction." },
+        { emphasis: "To design and develop ", rest: "a real-time IoT-based parking occupancy monitoring system with cloud-synchronized data analytics for CIT-U." },
+        { emphasis: "To evaluate ", rest: "the technical accuracy and reliability of WildcatPark in detecting real-time parking slot occupancy." },
+        { emphasis: "To determine ", rest: "the impact of WildcatPark on users’ parking experience by comparing pre-deployment and post-deployment survey data on search time, stress levels, and overall satisfaction." },
       ],
     },
   },
@@ -204,7 +204,7 @@ export const sections = [
       questions: [
         "How can a real-time IoT-based parking occupancy monitoring system with cloud-synchronized data analytics be designed and developed for CIT-U?",
         "How accurate and reliable is WildcatPark in detecting real-time parking slot occupancy?",
-        "Is there a significant difference in users' parking experience — in terms of search time, stress levels, and overall satisfaction — before and after the deployment of WildcatPark?",
+        "Is there a significant difference in users’ parking experience — in terms of search time, stress levels, and overall satisfaction — before and after the deployment of WildcatPark?",
       ],
     },
   },

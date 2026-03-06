@@ -115,7 +115,7 @@ export default function Sidebar() {
         </nav>
 
         <div className="sidebar-footer">
-          Prepared by <strong style={{ color: 'rgba(255,255,255,0.6)' }}>{meta.preparedBy}</strong>
+          Prepared by <strong style={{ color: 'var(--maroon)' }}>{meta.preparedBy}</strong>
           <br />
           {meta.institution}
         </div>

@@ -61,27 +61,29 @@ function SectionHeader({ number, title, id, status, copyText }) {
 function Subsection({ sub, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="subsection" id={sub.id}>
+    <div className={`subsection ${open ? 'is-open' : ''}`} id={sub.id}>
       <button className="subsection-toggle" onClick={() => setOpen(o => !o)}>
         <h3 className="subsection-title">{sub.title}</h3>
-        {open ? <ChevronUp size={16} className="subsection-chevron" /> : <ChevronDown size={16} className="subsection-chevron" />}
+        <ChevronDown size={16} className={`subsection-chevron ${open ? 'open' : ''}`} />
       </button>
-      {open && (
+      <div className="subsection-body-wrapper">
         <div className="subsection-body">
-          {sub.body && <p className="body-text">{sub.body}</p>}
-          {sub.type === 'ordered-list' && (
-            <ol className="ordered-list">
-              {sub.items.map((item, i) => <li key={i}>{item}</li>)}
-            </ol>
-          )}
-          {sub.type === 'unordered-list' && (
-            <ul className="unordered-list">
-              {sub.items.map((item, i) => <li key={i}>{item}</li>)}
-            </ul>
-          )}
-          {sub.footer && <p className="body-text" style={{ marginTop: '0.75rem' }}>{sub.footer}</p>}
+          <div className="subsection-body-inner">
+            {sub.body && <p className="body-text">{sub.body}</p>}
+            {sub.type === 'ordered-list' && (
+              <ol className="ordered-list">
+                {sub.items.map((item, i) => <li key={i}>{item}</li>)}
+              </ol>
+            )}
+            {sub.type === 'unordered-list' && (
+              <ul className="unordered-list">
+                {sub.items.map((item, i) => <li key={i}>{item}</li>)}
+              </ul>
+            )}
+            {sub.footer && <p className="body-text" style={{ marginTop: '0.75rem' }}>{sub.footer}</p>}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
